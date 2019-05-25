@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+  <name>Foc Simple Seo</name>
+  <code>default</code>
+  <version>1.0</version>
+  <author>Freeocart</author>
+  <link>http://freeocart.ru</link>
+
+  <!-- change logic of default seo_url -->
+  <file path="catalog/controller/startup/seo_url.php">
+  	<!-- disable common/home -->
+    <operation>
+        <search><![CDATA[} elseif ($key == 'path') {]]></search>
+        <add position="before"><![CDATA[
+        } elseif ($data['route'] == 'common/home') {
+          $this->load->model('extension/module/focsseo');
+          if ($this->model_extension_module_focsseo->isEnabled()
+              && $this->model_extension_module_focsseo->getSetting('disable_common_home', false)
+          ) {
+            $url .= '/';
+            unset($data[$key]);
+          }
+        // }
+				]]></add>
+	  </operation>
+    <!-- index -->
+    <operation>
+      <search><![CDATA[if (isset($this->request->get['_route_'])) {]]></search>
+      <add position="after"><![CDATA[
+      $this->load->model('extension/module/focsseo');
+			if ($this->model_extension_module_focsseo->isEnabled()) {
+				unset($this->session->data['fsseo_current_route']);
+				unset($this->session->data['fsseo_current_param']);
+
+				$language = $this->model_extension_module_focsseo->getLanguageFromRoute($this->request->get['_route_']);
+				if ($language && trim($language['prefix']) != '') {
+					$this->session->data['language'] = $language['code'];
+					$this->language = new Language($language['directory']);
+					$this->language->load($language['code']);
+					$this->registry->set('language', $this->language);
+					$this->config->set('config_language_id', $language['language_id']);
+					$this->request->get['_route_'] = substr( $this->request->get['_route_'], strlen($language['prefix'].'/'));
+				}
+			}
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[$this->request->get['route'] = 'product/product';]]></search>
+      <add position="after"><![CDATA[
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $this->session->data['fsseo_current_param'] = 'product_id=' . $this->request->get['product_id'];
+        $this->session->data['fsseo_current_route'] = $this->request->get['route'];
+      }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[$this->request->get['route'] = 'product/category';]]></search>
+      <add position="after"><![CDATA[
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $this->session->data['fsseo_current_param'] = 'path=' . $this->request->get['path'];
+        $this->session->data['fsseo_current_route'] = $this->request->get['route'];
+      }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[$this->request->get['route'] = 'product/manufacturer/info';]]></search>
+      <add position="after"><![CDATA[
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $this->session->data['fsseo_current_param'] = 'manufacturer_id=' . $this->request->get['manufacturer_id'];
+        $this->session->data['fsseo_current_route'] = $this->request->get['route'];
+      }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[$this->request->get['route'] = 'information/information';]]></search>
+      <add position="after"><![CDATA[
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $this->session->data['fsseo_current_param'] = 'information_id=' . $this->request->get['information_id'];
+        $this->session->data['fsseo_current_route'] = $this->request->get['route'];
+      }
+      ]]></add>
+    </operation>
+    <!-- rewrite -->
+    <operation>
+      <search><![CDATA[public function rewrite($link) {]]></search>
+      <add position="after"><![CDATA[
+      $this->load->model('extension/module/focsseo');
+      ]]></add>
+    </operation>
+    <!-- rewrites for product -->
+    <operation>
+      <search><![CDATA[$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($key . '=' . (int)$value) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");]]></search>
+      <add position="after"><![CDATA[
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
+      }
+      ]]></add>
+    </operation>
+    <!-- rewrites for categories -->
+    <operation>
+      <search><![CDATA[$categories = explode('_', $value);]]></search>
+      <add position="after"><![CDATA[
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
+      }
+      ]]></add>
+    </operation>
+  </file>
+
+  <!-- <file path="system/config/catalog.php">
+    <operation>
+      <search>
+        <![CDATA['startup/seo_url']]>
+      </search>
+      <add position="replace">
+        <![CDATA['extension/module/focsseo']]>
+      </add>
+    </operation>
+  </file> -->
+
+  <!-- correct redirects on language switch -->
+  <file path="catalog/controller/common/language.php">
+    <operation>
+      <search><![CDATA[if (isset($this->request->post['redirect'])) {]]></search>
+      <add position="after"><![CDATA[
+      $this->load->model('extension/module/focsseo');
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $this->request->post['redirect'] = $this->model_extension_module_focsseo->getRedirectUrl($this->session->data['language']);
+      }
+      ]]></add>
+    </operation>
+    <!-- <operation>
+      <search><![CDATA[$data['redirect'] = $this->url->link($route, $url, $this->request->server['HTTPS']);]]></search>
+      <add position="replace">
+        <![CDATA[
+          $this->load->model('extension/module/focsseo');
+          if ($this->model_extension_module_focsseo->isEnabled()) {
+            $data['redirect'] = $this->model_extension_module_focsseo->getNormalizedUrl($route, $url, $this->request->server['HTTPS']);
+          }
+          else {
+            $data['redirect'] = $this->url->link($route, $url, $this->request->server['HTTPS']);
+          }
+        ]]>
+      </add>
+    </operation>
+    <operation>
+      <search><![CDATA[if (isset($this->request->post['redirect'])) {]]></search>
+      <add position="after"><![CDATA[
+      $this->load->model('extension/module/focsseo');
+      if ($this->model_extension_module_focsseo->isEnabled()) {
+        $this->request->post['redirect'] = $this->model_extension_module_focsseo->linkNormalizedUrl($this->request->post['redirect']);
+      }
+      ]]></add>
+    </operation> -->
+  </file>
+</modification>
