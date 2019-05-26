@@ -12,15 +12,24 @@
     <operation>
         <search><![CDATA[} elseif ($key == 'path') {]]></search>
         <add position="before"><![CDATA[
-        } elseif ($data['route'] == 'common/home') {
-          $this->load->model('extension/module/focsseo');
-          if ($this->model_extension_module_focsseo->isEnabled()
-              && $this->model_extension_module_focsseo->getSetting('disable_common_home', false)
-          ) {
-            $url .= '/';
-            unset($data[$key]);
+        } elseif ($key == 'route') {
+          if ($data['route'] == 'common/home') {
+            if ($this->model_extension_module_focsseo->isEnabled()
+                && $this->model_extension_module_focsseo->getSetting('disable_common_home', false)
+            ) {
+              $url .= '/';
+              unset($data[$key]);
+            }
           }
-        // }
+          else {
+            $query = $this->db->query("SELECT keyword FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($data['route']) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+            if ($query->num_rows > 0) {
+              if ($this->model_extension_module_focsseo->isEnabled()) {
+                $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
+              }
+              $url .= '/' . $query->rows[0]['keyword'];
+            }
+          }
 				]]></add>
 	  </operation>
     <!-- index -->
@@ -42,6 +51,17 @@
 					$this->request->get['_route_'] = substr( $this->request->get['_route_'], strlen($language['prefix'].'/'));
 				}
 			}
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[if (!isset($this->request->get['route'])) {]]></search>
+      <add position="before"><![CDATA[
+      if (isset($this->request->get['route'])) {
+        if ($this->model_extension_module_focsseo->isEnabled()) {
+          $this->session->data['fsseo_current_route'] = $this->request->get['route'];
+          $this->session->data['fsseo_current_param'] = '';
+        }
+      }
       ]]></add>
     </operation>
     <operation>
@@ -105,6 +125,20 @@
       }
       ]]></add>
     </operation>
+    <!-- if we got route - check is it exists in db and retrieve its keyword -->
+    <!-- <operation>
+      <search><![CDATA[} elseif ($key == 'path') {]]></search>
+      <add position="before"><![CDATA[
+      } elseif ($key == 'route') {
+        $query = $this->db->query("SELECT keyword FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($data['route']) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+        if ($query->num_rows > 0) {
+          if ($this->model_extension_module_focsseo->isEnabled()) {
+            $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
+          }
+          $url .= '/' . $query->rows[0]['keyword'];
+        }
+      ]]></add>
+    </operation> -->
   </file>
 
   <!-- <file path="system/config/catalog.php">
