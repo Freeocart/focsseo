@@ -125,32 +125,7 @@
       }
       ]]></add>
     </operation>
-    <!-- if we got route - check is it exists in db and retrieve its keyword -->
-    <!-- <operation>
-      <search><![CDATA[} elseif ($key == 'path') {]]></search>
-      <add position="before"><![CDATA[
-      } elseif ($key == 'route') {
-        $query = $this->db->query("SELECT keyword FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($data['route']) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
-        if ($query->num_rows > 0) {
-          if ($this->model_extension_module_focsseo->isEnabled()) {
-            $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
-          }
-          $url .= '/' . $query->rows[0]['keyword'];
-        }
-      ]]></add>
-    </operation> -->
   </file>
-
-  <!-- <file path="system/config/catalog.php">
-    <operation>
-      <search>
-        <![CDATA['startup/seo_url']]>
-      </search>
-      <add position="replace">
-        <![CDATA['extension/module/focsseo']]>
-      </add>
-    </operation>
-  </file> -->
 
   <!-- correct redirects on language switch -->
   <file path="catalog/controller/common/language.php">
@@ -159,32 +134,11 @@
       <add position="after"><![CDATA[
       $this->load->model('extension/module/focsseo');
       if ($this->model_extension_module_focsseo->isEnabled()) {
-        $this->request->post['redirect'] = $this->model_extension_module_focsseo->getRedirectUrl($this->session->data['language']);
+				if ($localized = $this->model_extension_module_focsseo->getRedirectUrl($this->session->data['language'])) {
+					$this->request->post['redirect'] = $localized;
+				}
       }
       ]]></add>
     </operation>
-    <!-- <operation>
-      <search><![CDATA[$data['redirect'] = $this->url->link($route, $url, $this->request->server['HTTPS']);]]></search>
-      <add position="replace">
-        <![CDATA[
-          $this->load->model('extension/module/focsseo');
-          if ($this->model_extension_module_focsseo->isEnabled()) {
-            $data['redirect'] = $this->model_extension_module_focsseo->getNormalizedUrl($route, $url, $this->request->server['HTTPS']);
-          }
-          else {
-            $data['redirect'] = $this->url->link($route, $url, $this->request->server['HTTPS']);
-          }
-        ]]>
-      </add>
-    </operation>
-    <operation>
-      <search><![CDATA[if (isset($this->request->post['redirect'])) {]]></search>
-      <add position="after"><![CDATA[
-      $this->load->model('extension/module/focsseo');
-      if ($this->model_extension_module_focsseo->isEnabled()) {
-        $this->request->post['redirect'] = $this->model_extension_module_focsseo->linkNormalizedUrl($this->request->post['redirect']);
-      }
-      ]]></add>
-    </operation> -->
   </file>
 </modification>

@@ -108,32 +108,6 @@ class ModelExtensionModuleFOCSSeo extends Model {
     return null;
   }
 
-  /*
-    Make internal url without any rewrites
-  */
-  // public function getNormalizedUrl ($route, $args, $https) {
-  //   $url = new Url($this->config->get('site_url'), $this->config->get('site_ssl'));
-  //   $normalized = $url->link($route, $args, $https);
-  //   unset($url);
-  //   return $normalized;
-  // }
-  //
-  // public function linkNormalizedUrl ($normalized, $language_code) {
-  //   $normalized = str_replace($this->url->link('', '', $this->request->server['HTTPS']), '', $normalized);
-  //   $parts = explode('?', $normalized);
-
-  //   foreach ($this->getLanguages() as $lang) {
-  //     if ($lang['code'] == $language_code) {
-  //       $this->config->set('config_language_id', $lang['language_id']);
-  //     }
-  //   }
-
-  //   if (count($parts) > 1) {
-  //     return $this->url->link($parts[0], $parts[1], $this->request->server['HTTPS']);
-  //   }
-  //   return $this->url->link($parts[0], '', $this->request->server['HTTPS']);
-  // }
-
   public function getRedirectUrl ($language_code) {
     if (isset($this->session->data['fsseo_current_route'])
         && isset($this->session->data['fsseo_current_param'])
@@ -146,13 +120,12 @@ class ModelExtensionModuleFOCSSeo extends Model {
           $this->config->set('config_language_id', $lang['language_id']);
         }
       }
-
       $redirect = $this->url->link($current_route, $current_param);
 
       return $redirect;
     }
 
-    return $this->url->link('common/home');
+    return false;
   }
   /*
     Check is module installed
