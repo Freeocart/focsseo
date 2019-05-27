@@ -108,24 +108,80 @@ class ModelExtensionModuleFOCSSeo extends Model {
     return null;
   }
 
-  public function getRedirectUrl ($language_code) {
-    if (isset($this->session->data['fsseo_current_route'])
-        && isset($this->session->data['fsseo_current_param'])
+  public function parseUrl ($url, $lang_id) {
+    if (isset($this->request->server['HTTPS'])
+        && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))
     ) {
-      $current_route = $this->session->data['fsseo_current_route'];
-      $current_param = $this->session->data['fsseo_current_param'];
-
-      foreach ($this->getLanguages() as $lang) {
-        if ($lang['code'] == $language_code) {
-          $this->config->set('config_language_id', $lang['language_id']);
-        }
-      }
-      $redirect = $this->url->link($current_route, $current_param);
-
-      return $redirect;
+      $baseUrl = $this->config->get('config_ssl');
+    }
+    else {
+      $baseUrl = $this->config->get('config_url');
     }
 
+    $relativePath = str_replace($baseUrl, '', $url);
+
+    $language = $this->getLanguageInfoFromRoute($relativePath);
+
+    $relativePath = trim(preg_replace(preg_quote('/' . $language['prefix'] . '/'), '', $relativePath, 1), '/');
+    $parsed = parse_url(str_replace('&amp;', '&', $relativePath));
+
+    // has GET
+    if (isset($parsed['query'])) {
+      parse_str($parsed['query'], $query);
+
+      // has route=...
+      if (isset($query['route'])) {
+        $route = $query['route'];
+        unset($query['route']);
+
+        return $this->url->link($route, http_build_query($query), $this->request->server['HTTPS']);
+      }
+    }
     return false;
+  }
+
+  public function getRedirectUrl ($language_code, $redirect) {
+    $previousLang = $this->config->get('config_language_id');
+
+    foreach ($this->getLanguages() as $lang) {
+      if ($lang['code'] == $language_code) {
+        if ($lang['language_id'] === $previousLang) {
+          return $redirect;
+        }
+        $this->config->set('config_language_id', $lang['language_id']);
+      }
+    }
+
+    $link = $this->parseUrl($redirect, $previousLang);
+
+    if ($link) {
+      return $link;
+    }
+    return $redirect;
+    // if (isset($this->session->data['fsseo_current_route'])
+    //     && isset($this->session->data['fsseo_current_param'])
+    // ) {
+    //   $current_route = $this->session->data['fsseo_current_route'];
+    //   $current_param = $this->session->data['fsseo_current_param'];
+
+    //   foreach ($this->getLanguages() as $lang) {
+    //     if ($lang['code'] == $language_code) {
+    //       $this->config->set('config_language_id', $lang['language_id']);
+    //     }
+    //   }
+
+    //   $link = $this->parseUrl($redirect);
+
+    //   var_dump($this->url->link($redirect));
+    //   die;
+
+    //   if ($link) {
+    //     return $this->url->link($link);
+    //   }
+    //   return $redirect;
+    // }
+
+    // return false;
   }
   /*
     Check is module installed

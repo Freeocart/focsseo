@@ -38,8 +38,8 @@
       <add position="after"><![CDATA[
       $this->load->model('extension/module/focsseo');
 			if ($this->model_extension_module_focsseo->isEnabled()) {
-				unset($this->session->data['fsseo_current_route']);
-				unset($this->session->data['fsseo_current_param']);
+				// unset($this->session->data['fsseo_current_route']);
+				// unset($this->session->data['fsseo_current_param']);
 
 				$language = $this->model_extension_module_focsseo->getLanguageFromRoute($this->request->get['_route_']);
 				if ($language && trim($language['prefix']) != '') {
@@ -53,7 +53,7 @@
 			}
       ]]></add>
     </operation>
-    <operation>
+    <!-- <operation>
       <search><![CDATA[if (!isset($this->request->get['route'])) {]]></search>
       <add position="before"><![CDATA[
       if (isset($this->request->get['route'])) {
@@ -99,7 +99,7 @@
         $this->session->data['fsseo_current_route'] = $this->request->get['route'];
       }
       ]]></add>
-    </operation>
+    </operation> -->
     <!-- rewrite -->
     <operation>
       <search><![CDATA[public function rewrite($link) {]]></search>
@@ -130,11 +130,18 @@
   <!-- correct redirects on language switch -->
   <file path="catalog/controller/common/language.php">
     <operation>
+      <search><![CDATA[$data['redirect'] = $this->url->link($route, $url, $this->request->server['HTTPS']);]]></search>
+      <add position="replace"><![CDATA[
+        $emptyUrl = new Url($this->config->get('site_url'), $this->config->get('site_ssl'));
+        $data['redirect'] = $emptyUrl->link($route, $url, $this->request->server['HTTPS']);
+      ]]></add>
+    </operation>
+    <operation>
       <search><![CDATA[if (isset($this->request->post['redirect'])) {]]></search>
       <add position="after"><![CDATA[
       $this->load->model('extension/module/focsseo');
       if ($this->model_extension_module_focsseo->isEnabled()) {
-				if ($localized = $this->model_extension_module_focsseo->getRedirectUrl($this->session->data['language'])) {
+				if ($localized = $this->model_extension_module_focsseo->getRedirectUrl($this->session->data['language'], $this->request->post['redirect'])) {
 					$this->request->post['redirect'] = $localized;
 				}
       }
