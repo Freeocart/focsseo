@@ -109,6 +109,37 @@
     </operation>
   </file>
 
+  <file path="admin/view/template/catalog/manufacturer_form.twig">
+    <operation>
+      <search><![CDATA[{{ footer }}]]></search>
+      <add position="before"><![CDATA[
+        <script type="text/javascript" src="view/javascript/focsseo/focsseo-transliterator.js"></script>
+        <script>
+        var languages = {}
+        languages['{{ language.language_id }}'] = {
+          source: '#input-name',
+          targets: [
+            {% for store in stores %}
+            {
+              {% for language in languages %}
+              selector: '[name="manufacturer_seo_url[{{ store.store_id }}][{{ language.language_id }}]"]',
+              forceReplace: {% if manufacturer_seo_url[store.store_id][language.language_id] %}false{% else %}true{% endif %}
+              {% endfor %}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ],
+          prefix: '{{ language.seo_url_prefix }}',
+          postfix: '{{ language.seo_url_postfix }}'
+        }
+
+        new FocSSeoTransliterator({
+          languages: languages
+        });
+        </script>
+      ]]></add>
+    </operation>
+  </file>
+
   <!-- for fractalika -->
   <file path="admin/view/template/blog/article_form.twig">
     <operation>
