@@ -6,6 +6,143 @@
   <author>Freeocart</author>
   <link>http://freeocart.ru</link>
 
+  <!-- auto url generate -->
+  <file path="admin/view/template/catalog/product_form.twig">
+    <operation>
+      <search><![CDATA[{{ footer }}]]></search>
+      <add position="before"><![CDATA[
+        <script type="text/javascript" src="view/javascript/focsseo/focsseo-transliterator.js"></script>
+        <script>
+        var languages = {}
+        {% for language in languages %}
+        languages['{{ language.language_id }}'] = {
+          source: '#input-name{{ language.language_id }}',
+          copyTextTo: [
+            '#input-meta-title{{ language.language_id }}'
+          ],
+          targets: [
+            {% for store in stores %}
+            {
+              selector: '[name="product_seo_url[{{ store.store_id }}][{{ language.language_id }}]"]',
+              forceReplace: {% if product_seo_url[store.store_id][language.language_id] %}false{% else %}true{% endif %}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ],
+          prefix: '{{ language.seo_url_prefix }}',
+          postfix: '{{ language.seo_url_postfix }}'
+        }
+        {% endfor %}
+
+        new FocSSeoTransliterator({
+          languages: languages
+        });
+        </script>
+      ]]></add>
+    </operation>
+  </file>
+
+  <file path="admin/view/template/catalog/category_form.twig">
+    <operation>
+      <search><![CDATA[{{ footer }}]]></search>
+      <add position="before"><![CDATA[
+        <script type="text/javascript" src="view/javascript/focsseo/focsseo-transliterator.js"></script>
+        <script>
+        var languages = {}
+        {% for language in languages %}
+        languages['{{ language.language_id }}'] = {
+          source: '#input-name{{ language.language_id }}',
+          copyTextTo: [
+            '#input-meta-title{{ language.language_id }}'
+          ],
+          targets: [
+            {% for store in stores %}
+            {
+              selector: '[name="category_seo_url[{{ store.store_id }}][{{ language.language_id }}]"]',
+              forceReplace: {% if category_seo_url[store.store_id][language.language_id] %}false{% else %}true{% endif %}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ],
+          prefix: '{{ language.seo_url_prefix }}',
+          postfix: '{{ language.seo_url_postfix }}'
+        }
+        {% endfor %}
+
+        new FocSSeoTransliterator({
+          languages: languages
+        });
+        </script>
+      ]]></add>
+    </operation>
+  </file>
+
+  <file path="admin/view/template/catalog/information_form.twig">
+    <operation>
+      <search><![CDATA[{{ footer }}]]></search>
+      <add position="before"><![CDATA[
+        <script type="text/javascript" src="view/javascript/focsseo/focsseo-transliterator.js"></script>
+        <script>
+        var languages = {}
+        {% for language in languages %}
+        languages['{{ language.language_id }}'] = {
+          source: '#input-title{{ language.language_id }}',
+          copyTextTo: [
+            '#input-meta-title{{ language.language_id }}'
+          ],
+          targets: [
+            {% for store in stores %}
+            {
+              selector: '[name="information_seo_url[{{ store.store_id }}][{{ language.language_id }}]"]',
+              forceReplace: {% if information_seo_url[store.store_id][language.language_id] %}false{% else %}true{% endif %}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ],
+          prefix: '{{ language.seo_url_prefix }}',
+          postfix: '{{ language.seo_url_postfix }}'
+        }
+        {% endfor %}
+
+        new FocSSeoTransliterator({
+          languages: languages
+        });
+        </script>
+      ]]></add>
+    </operation>
+  </file>
+
+  <!-- for fractalika -->
+  <file path="admin/view/template/blog/article_form.twig">
+    <operation>
+      <search><![CDATA[{{ footer }}]]></search>
+      <add position="before"><![CDATA[
+        <script type="text/javascript" src="view/javascript/focsseo/focsseo-transliterator.js"></script>
+        <script>
+        var languages = {}
+        {% for language in languages %}
+        languages['{{ language.language_id }}'] = {
+          source: '#input-name{{ language.language_id }}',
+          copyTextTo: [
+            '#input-meta-title{{ language.language_id }}'
+          ],
+          targets: [
+            {
+              selector: '#input-keyword',
+              forceReplace: {% if keyword %}false{% else %}true{% endif %}
+            }
+          ],
+          prefix: '{{ language.seo_url_prefix }}',
+          postfix: '{{ language.seo_url_postfix }}'
+        }
+        {% endfor %}
+
+        new FocSSeoTransliterator({
+          languages: languages
+        });
+        </script>
+      ]]></add>
+    </operation>
+  </file>
+  <!-- / for fractalika -->
+
   <!-- change logic of default seo_url -->
   <file path="catalog/controller/startup/seo_url.php">
   	<!-- disable common/home -->
