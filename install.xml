@@ -119,14 +119,14 @@
         languages['{{ language.language_id }}'] = {
           source: '#input-name',
           targets: [
+          {% for language in languages %}
             {% for store in stores %}
             {
-              {% for language in languages %}
               selector: '[name="manufacturer_seo_url[{{ store.store_id }}][{{ language.language_id }}]"]',
               forceReplace: {% if manufacturer_seo_url[store.store_id][language.language_id] %}false{% else %}true{% endif %}
-              {% endfor %}
             }{% if not loop.last %},{% endif %}
-            {% endfor %}
+            {% endfor %}{% if not loop.last %},{% endif %}
+          {% endfor %}
           ],
           prefix: '{{ language.seo_url_prefix }}',
           postfix: '{{ language.seo_url_postfix }}'
