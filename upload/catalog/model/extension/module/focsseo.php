@@ -50,7 +50,7 @@ class ModelExtensionModuleFOCSSeo extends Model {
     Get url prefix by language_id
     If there is no defined prefix, or language is non-prefixed - returns empty string
   */
-  public function getUrlPrefix ($language_id) {
+  public function getUrlPrefix ($language_id, $addSlash = true) {
     $mode = $this->getSetting('mode', 'disabled');
     $prefixes = $this->getSetting('language_prefix');
 
@@ -63,7 +63,7 @@ class ModelExtensionModuleFOCSSeo extends Model {
       case 'prefix_all':
       default:
         if (!empty($prefixes[$language_id])) {
-          $prefix = '/' . $prefixes[$language_id];
+          $prefix = ($addSlash ? '/' : '') . $prefixes[$language_id];
         }
         break;
     }
@@ -137,7 +137,9 @@ class ModelExtensionModuleFOCSSeo extends Model {
         return $this->url->link($route, http_build_query($query), $this->request->server['HTTPS']);
       }
     }
-    return false;
+    else {
+      return $this->url->link('common/home', '', $this->request->server['HTTPS']);
+    }
   }
 
   public function getRedirectUrl ($language_code, $redirect) {
@@ -152,36 +154,7 @@ class ModelExtensionModuleFOCSSeo extends Model {
       }
     }
 
-    $link = $this->parseUrl($redirect, $previousLang);
-
-    if ($link) {
-      return $link;
-    }
-    return $redirect;
-    // if (isset($this->session->data['fsseo_current_route'])
-    //     && isset($this->session->data['fsseo_current_param'])
-    // ) {
-    //   $current_route = $this->session->data['fsseo_current_route'];
-    //   $current_param = $this->session->data['fsseo_current_param'];
-
-    //   foreach ($this->getLanguages() as $lang) {
-    //     if ($lang['code'] == $language_code) {
-    //       $this->config->set('config_language_id', $lang['language_id']);
-    //     }
-    //   }
-
-    //   $link = $this->parseUrl($redirect);
-
-    //   var_dump($this->url->link($redirect));
-    //   die;
-
-    //   if ($link) {
-    //     return $this->url->link($link);
-    //   }
-    //   return $redirect;
-    // }
-
-    // return false;
+    return $this->parseUrl($redirect, $previousLang);
   }
   /*
     Check is module installed

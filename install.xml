@@ -185,7 +185,7 @@
             if ($this->model_extension_module_focsseo->isEnabled()
                 && $this->model_extension_module_focsseo->getSetting('disable_common_home', false)
             ) {
-              $url .= '/';
+              $url .= '/' . $this->model_extension_module_focsseo->getUrlPrefix($this->config->get('config_language_id'), false);
               unset($data[$key]);
             }
           }
@@ -193,7 +193,7 @@
             $query = $this->db->query("SELECT keyword FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($data['route']) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
             if ($query->num_rows > 0) {
               if ($this->model_extension_module_focsseo->isEnabled()) {
-                $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
+                $url = $this->model_extension_module_focsseo->getUrlPrefix($this->config->get('config_language_id'));
               }
               $url .= '/' . $query->rows[0]['keyword'];
             }
@@ -280,7 +280,7 @@
       <search><![CDATA[$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($key . '=' . (int)$value) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");]]></search>
       <add position="after"><![CDATA[
       if ($this->model_extension_module_focsseo->isEnabled()) {
-        $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
+        $url = $this->model_extension_module_focsseo->getUrlPrefix($this->config->get('config_language_id'));
       }
       ]]></add>
     </operation>
@@ -289,7 +289,7 @@
       <search><![CDATA[$categories = explode('_', $value);]]></search>
       <add position="after"><![CDATA[
       if ($this->model_extension_module_focsseo->isEnabled()) {
-        $url = $this->model_extension_module_focsseo->getUrlPrefix($current_language_id = $this->config->get('config_language_id'));
+        $url = $this->model_extension_module_focsseo->getUrlPrefix($this->config->get('config_language_id'));
       }
       ]]></add>
     </operation>
